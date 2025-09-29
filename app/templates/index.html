@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Tâches - Hôtel Le Trèfle</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo-hotel.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/logo-hotel.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <img src="{{ url_for('static', filename='images/logo-hotel.png') }}" 
+                     alt="Logo de l'hôtel" 
+                     class="hotel-logo" >
+                     
+                <h1 class="app-title">Gestion des Tâches - Hôtel Le Trèfle</h1>
+            </div>
+            <div class="user-section">
+                <span class="user-name">
+                    📅 {{ current_date_french if current_date_french else 'Date non disponible' }}
+                    <span class="user-role" aria-label="Statut">Axel</span>
+                </span>
+                <div class="user-avatar" aria-hidden="true">AD</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation tabs -->
+    <nav class="nav-tabs" aria-label="Navigation principale">
+        <div class="nav-content">
+            <a href="{{ url_for('main.index', view='weekend') }}" 
+               class="nav-tab {{ 'active' if view == 'weekend' else '' }}">🗓️ Ce week-end</a>
+            <a href="{{ url_for('main.index', view='all') }}" 
+               class="nav-tab {{ 'active' if view == 'all' else '' }}">📋 Toutes les tâches</a>
+            <a href="{{ url_for('main.index', view='completed') }}" 
+               class="nav-tab {{ 'active' if view == 'completed' else '' }}">✅ Terminées</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <span aria-hidden="true">{% if view == 'weekend' %}🗓️{% elif view == 'completed' %}✅{% else %}📋{% endif %}</span>
+                {% if view == 'weekend' %}Ce week-end{% elif view == 'completed' %}Tâches terminées{% else %}Toutes les tâches{% endif %}
+            </h1>
+        </div>
+
+        <!-- Add Task Form -->
+        <div class="add-form">
+            <form method="POST" action="{{ url_for('main.create_task_web') }}" class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="title">Titre de la tâche</label>
+                    <input type="text" id="title" name="title" class="form-input" required maxlength="500" 
+                           placeholder="Exemple: Contrôle chambres étage 2">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="due_date">Date d'échéance</label>
+                    <input type="date" id="due_date" name="due_date" class="form-input" required>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="is_recurring" name="is_recurring">
+                    <label class="checkbox-label" for="is_recurring">Récurrente</label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">➕ Ajouter</button>
+            </form>
+        </div>
+        
+        <!-- Content based on view -->
+        {% if view == 'all' %}
+            <!-- All Tasks View -->
+            {% if all_weeks %}
+                {% for week_key, week_data in all_weeks %}
+                    {% set total_tasks = week_data.friday_tasks|length + week_data.saturday_tasks|length + week_data.sunday_tasks|length %}
+                    <section class="week-section" data-week-key="{{ week_key }}">
+                        <button class="week-toggle" type="button" data-week-toggle aria-expanded="true">
+                            <span class="week-title">📅 Semaine du {{ week_data.friday_date.strftime('%d/%m/%Y') }}</span>
+                            <span class="week-count">{{ total_tasks }} tâche(s)</span>
+                            <span class="week-toggle-icon" aria-hidden="true">▾</span>
+                        </button>
+                        <div class="week-content" data-week-content>
+                            <div class="tasks-grid">
+                            <!-- Friday -->
+                            <div class="task-card">
+                                <div class="task-header">
+                                    <div class="task-info">
+                                        <div class="task-icon">V</div>
+                                        <div class="task-details">
+                                            <div class="task-day-title">Vendredi</div>
+                                            <div class="task-day-date">{{ week_data.friday_date.strftime('%d/%m/%Y') }}</div>
+                                        </div>
+                                        <span class="task-count">{{ week_data.friday_tasks|length }} tâche(s)</span>
+                                    </div>
+                                </div>
+                                <div class="task-body">
+                                    {% if week_data.friday_tasks %}
+                                        <div class="task-list">
+                                            {% for task in week_data.friday_tasks %}
+                                                {% include 'task_item.html' %}
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="no-tasks">Aucune tâche</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Saturday -->
+                            <div class="task-card">
+                                <div class="task-header">
+                                    <div class="task-info">
+                                        <div class="task-icon">S</div>
+                                        <div class="task-details">
+                                            <div class="task-day-title">Samedi</div>
+                                            <div class="task-day-date">{{ week_data.saturday_date.strftime('%d/%m/%Y') }}</div>
+                                        </div>
+                                        <span class="task-count">{{ week_data.saturday_tasks|length }} tâche(s)</span>
+                                    </div>
+                                </div>
+                                <div class="task-body">
+                                    {% if week_data.saturday_tasks %}
+                                        <div class="task-list">
+                                            {% for task in week_data.saturday_tasks %}
+                                                {% include 'task_item.html' %}
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="no-tasks">Aucune tâche</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Sunday -->
+                            <div class="task-card">
+                                <div class="task-header">
+                                    <div class="task-info">
+                                        <div class="task-icon">D</div>
+                                        <div class="task-details">
+                                            <div class="task-day-title">Dimanche</div>
+                                            <div class="task-day-date">{{ week_data.sunday_date.strftime('%d/%m/%Y') }}</div>
+                                        </div>
+                                        <span class="task-count">{{ week_data.sunday_tasks|length }} tâche(s)</span>
+                                    </div>
+                                </div>
+                                <div class="task-body">
+                                    {% if week_data.sunday_tasks %}
+                                        <div class="task-list">
+                                            {% for task in week_data.sunday_tasks %}
+                                                {% include 'task_item.html' %}
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <div class="no-tasks">Aucune tâche</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </section>
+                {% endfor %}
+            {% else %}
+                <div class="task-card">
+                    <div class="no-tasks">Aucune tâche trouvée</div>
+                </div>
+            {% endif %}
+            
+        {% elif view == 'completed' %}
+            <!-- Completed Tasks View -->
+            {% if completed_by_date %}
+                {% for date_key, date_data in completed_by_date %}
+                    <div class="task-card" style="margin-bottom: 1.5rem;">
+                        <div class="task-header">
+                            <div class="task-info">
+                                <div class="task-icon">✅</div>
+                                <div class="task-details">
+                                    <div class="task-day-title">Terminées le {{ date_data.date.strftime('%A %d %B %Y') }}</div>
+                                    <div class="task-day-date">{{ date_data.tasks|length }} tâche(s)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-body">
+                            <div class="task-list">
+                                {% for task in date_data.tasks %}
+                                    <div class="task-item">
+                                        <div style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
+                                            ✅
+                                        </div>
+                                        <div class="task-content">
+                                            <span class="task-title done">{{ task.title }}</span>
+                                            {% if task.is_recurring %}
+                                                <span class="task-chip">Récurrente</span>
+                                            {% endif %}
+                                            <span style="color: #718096; font-size: 0.75rem; margin-left: 0.5rem;">
+                                                Échéance: {{ task.due_date.strftime('%d/%m/%Y') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="task-card">
+                    <div class="no-tasks">Aucune tâche terminée</div>
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- Weekend View (Default) -->
+            {% if friday_date and saturday_date and sunday_date %}
+            <div class="tasks-grid">
+                <!-- Friday -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-info">
+                            <div class="task-icon">V</div>
+                            <div class="task-details">
+                                <div class="task-day-title">Vendredi</div>
+                                <div class="task-day-date">{{ friday_date.strftime('%d/%m/%Y') }}</div>
+                            </div>
+                            <span class="task-count">{{ friday_tasks|length }} tâche(s)</span>
+                        </div>
+                    </div>
+                    <div class="task-body">
+                        {% if friday_tasks %}
+                            <div class="task-list">
+                                {% for task in friday_tasks %}
+                                    {% include 'task_item.html' %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="no-tasks">Aucune tâche pour vendredi</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Saturday -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-info">
+                            <div class="task-icon">S</div>
+                            <div class="task-details">
+                                <div class="task-day-title">Samedi</div>
+                                <div class="task-day-date">{{ saturday_date.strftime('%d/%m/%Y') }}</div>
+                            </div>
+                            <span class="task-count">{{ saturday_tasks|length }} tâche(s)</span>
+                        </div>
+                    </div>
+                    <div class="task-body">
+                        {% if saturday_tasks %}
+                            <div class="task-list">
+                                {% for task in saturday_tasks %}
+                                    {% include 'task_item.html' %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="no-tasks">Aucune tâche pour samedi</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Sunday -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-info">
+                            <div class="task-icon">D</div>
+                            <div class="task-details">
+                                <div class="task-day-title">Dimanche</div>
+                                <div class="task-day-date">{{ sunday_date.strftime('%d/%m/%Y') }}</div>
+                            </div>
+                            <span class="task-count">{{ sunday_tasks|length }} tâche(s)</span>
+                        </div>
+                    </div>
+                    <div class="task-body">
+                        {% if sunday_tasks %}
+                            <div class="task-list">
+                                {% for task in sunday_tasks %}
+                                    {% include 'task_item.html' %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="no-tasks">Aucune tâche pour dimanche</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+                <div class="task-card">
+                    <div class="no-tasks">Erreur lors du chargement des tâches</div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-text">© 2025 Hôtel Lumière — Gestion des tâches</div>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Aide</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

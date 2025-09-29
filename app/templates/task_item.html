@@ -1,0 +1,52 @@
+<div class="task-item"
+     id="task-{{ task.id }}"
+     data-task-id="{{ task.id }}"
+     data-is-done="{{ 'true' if task.is_done else 'false' }}"
+     data-display-order="{{ task.display_order or 0 }}"
+     data-created-at="{{ task.created_at.isoformat() if task.created_at else '' }}"
+     data-due-date="{{ task.due_date.isoformat() if task.due_date else '' }}">
+    <form method="POST" action="{{ url_for('main.toggle_task', task_id=task.id) }}"
+          hx-post="{{ url_for('main.toggle_task', task_id=task.id) }}"
+          hx-target="closest .task-item"
+          hx-swap="outerHTML"
+          hx-trigger="change"
+          style="display: flex; align-items: center;">
+        <input type="checkbox" class="task-checkbox" 
+               {{ "checked" if task.is_done else "" }}
+               onchange="if (!window.htmx) { this.form.submit(); }">
+    </form>
+    
+    <div class="task-content">
+        <div class="task-text-row">
+            <span class="task-title {{ 'done' if task.is_done else '' }}">
+                {{ task.title }}
+            </span>
+            {% if task.is_recurring %}
+                <span class="task-chip">Récurrente</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if not task.is_done %}
+        <div class="task-actions">
+            <button onclick="toggleEdit({{ task.id }})" class="btn btn-outline btn-small">
+                ✏️ Éditer
+            </button>
+            <form method="POST" action="{{ url_for('main.delete_task', task_id=task.id) }}" 
+                  style="display: inline;">
+                <button type="submit" class="btn btn-danger btn-small" 
+                        onclick="return confirm('Supprimer cette tâche ?')">
+                    🗑️ Supprimer
+                </button>
+            </form>
+        </div>
+    {% endif %}
+    
+    <form method="POST" action="{{ url_for('main.edit_task', task_id=task.id) }}" 
+          class="edit-form" id="edit-form-{{ task.id }}">
+        <input type="text" name="title" value="{{ task.title }}" required>
+        <button type="submit" class="btn btn-success btn-small">💾 Sauver</button>
+        <button type="button" onclick="toggleEdit({{ task.id }})" 
+                class="btn btn-outline btn-small">❌ Annuler</button>
+    </form>
+</div>
