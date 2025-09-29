@@ -77,7 +77,7 @@ def create_app():
     
     # Chemin par défaut selon l'environnement
     if flask_env == 'production':
-        default_db_url = 'sqlite:////root/todo-hotel/data/todo_hotel.db'
+        default_db_url = 'sqlite:////root/todo-hotel/instace/todo_hotel.db'
     else:
         # Utiliser un chemin absolu pour le développement
         basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
