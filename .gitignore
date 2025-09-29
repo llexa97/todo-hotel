@@ -1,0 +1,51 @@
+# OS-specific files
+.DS_Store
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Flask instance data (keep directory, ignore databases)
+instance/*.db
+instance/*.sqlite
+instance/*.sqlite3
+
+# Project-wide database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs and runtime exports
+logs/
+backups/
+data/
+*.log
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Tooling caches
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage.*
+
+# Editor settings
+.idea/
+.vscode/
+*.swp
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.sample
