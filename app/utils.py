@@ -2,8 +2,11 @@
 Utility functions for the Todo Hotel application
 """
 
+import os
+import re
+import ast
 from datetime import datetime, date, timedelta
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 from sqlalchemy.exc import IntegrityError
 from flask import current_app
 from . import db
@@ -71,7 +74,7 @@ def create_task_if_not_exists(title: str, due_date: date, is_recurring: bool = F
     # Create new task
     try:
         current_app.logger.debug(f"💾 Insertion en base - Titre: '{title}', Date: {due_date.strftime('%Y-%m-%d')}")
-        
+
         new_task = Task(
             title=title,
             due_date=due_date,
@@ -80,8 +83,18 @@ def create_task_if_not_exists(title: str, due_date: date, is_recurring: bool = F
         )
         db.session.add(new_task)
         db.session.commit()
-        
+
         current_app.logger.info(f"✅ Tâche créée avec succès - ID: {new_task.id}, Titre: '{title}'")
+
+        # Synchronize recurring task to script
+        if is_recurring:
+            current_app.logger.debug(f"🔄 Synchronisation tâche récurrente vers script - Titre: '{title}'")
+            sync_success = sync_recurring_task_to_script(title, due_date)
+            if sync_success:
+                current_app.logger.info(f"✅ Synchronisation script réussie - Titre: '{title}'")
+            else:
+                current_app.logger.warning(f"⚠️ Synchronisation script échouée (tâche créée en DB) - Titre: '{title}'")
+
         return new_task, 201
     
     except IntegrityError as e:
@@ -202,5 +215,112 @@ def get_target_weekend(reference_date=None):
     sunday = friday + timedelta(days=2)
     
     current_app.logger.debug(f"✅ Week-end calculé - Vendredi: {friday.strftime('%Y-%m-%d')}, Samedi: {saturday.strftime('%Y-%m-%d')}, Dimanche: {sunday.strftime('%Y-%m-%d')}")
-    
+
     return friday, saturday, sunday
+
+
+def sync_recurring_task_to_script(title: str, due_date: date) -> bool:
+    """
+    Synchronize a recurring task to the generate_weekly_tasks.py script.
+
+    Args:
+        title (str): Task title
+        due_date (date): Task due date (must be Friday, Saturday, or Sunday)
+
+    Returns:
+        bool: True if sync succeeded, False otherwise
+    """
+    try:
+        # Determine day_offset based on weekday
+        weekday = due_date.weekday()  # 0=Monday, 4=Friday, 5=Saturday, 6=Sunday
+
+        if weekday == 4:  # Friday
+            day_offset = 0
+        elif weekday == 5:  # Saturday
+            day_offset = 1
+        elif weekday == 6:  # Sunday
+            day_offset = 2
+        else:
+            current_app.logger.warning(f"⚠️ Sync ignorée - Date non weekend: {due_date.strftime('%Y-%m-%d')} ({due_date.strftime('%A')})")
+            return False
+
+        # Get path to generate_weekly_tasks.py
+        script_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'generate_weekly_tasks.py')
+
+        if not os.path.exists(script_path):
+            current_app.logger.error(f"❌ Script introuvable: {script_path}")
+            return False
+
+        # Read the file
+        with open(script_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Parse existing tasks to find max order for this day
+        existing_tasks = _parse_weekly_tasks(content)
+        max_order = max([t['order'] for t in existing_tasks if t['day_offset'] == day_offset], default=0)
+        new_order = max_order + 1
+
+        # Check if task already exists
+        if any(t['title'] == title and t['day_offset'] == day_offset for t in existing_tasks):
+            current_app.logger.info(f"ℹ️ Tâche déjà dans le script: '{title}' (day_offset={day_offset})")
+            return True
+
+        # Create new task entry
+        day_name = ["Vendredi", "Samedi", "Dimanche"][day_offset]
+        new_task_line = f'    {{"title": "{title}", "day_offset": {day_offset}, "order": {new_order}}},'
+
+        # Find insertion point (before the closing bracket of WEEKLY_TASKS)
+        # Find the section for the appropriate day
+        pattern = rf'# {day_name}.*?\n((?:    \{{"title":.*?\}},\n)*)'
+        match = re.search(pattern, content, re.DOTALL)
+
+        if match:
+            # Insert at the end of this day's section
+            insert_pos = match.end(1)
+            new_content = content[:insert_pos] + new_task_line + '\n' + content[insert_pos:]
+        else:
+            # Fallback: insert before closing bracket
+            pattern = r'(\n]\s*\n)'
+            match = re.search(pattern, content)
+            if match:
+                insert_pos = match.start()
+                new_content = content[:insert_pos] + '\n    ' + new_task_line + content[insert_pos:]
+            else:
+                current_app.logger.error(f"❌ Impossible de trouver le point d'insertion dans {script_path}")
+                return False
+
+        # Write updated content
+        with open(script_path, 'w', encoding='utf-8') as f:
+            f.write(new_content)
+
+        current_app.logger.info(f"✅ Tâche synchronisée dans script: '{title}' (day_offset={day_offset}, order={new_order})")
+        return True
+
+    except Exception as e:
+        current_app.logger.error(f"💥 Erreur sync script - Titre: '{title}', Erreur: {str(e)}", exc_info=True)
+        return False
+
+
+def _parse_weekly_tasks(content: str) -> List[Dict[str, Any]]:
+    """
+    Parse WEEKLY_TASKS from the script content.
+
+    Args:
+        content (str): Script file content
+
+    Returns:
+        List[Dict]: List of parsed tasks
+    """
+    tasks = []
+
+    # Find all task dictionaries
+    pattern = r'\{"title":\s*"([^"]+)",\s*"day_offset":\s*(\d+),\s*"order":\s*(\d+)\}'
+
+    for match in re.finditer(pattern, content):
+        tasks.append({
+            'title': match.group(1),
+            'day_offset': int(match.group(2)),
+            'order': int(match.group(3))
+        })
+
+    return tasks
