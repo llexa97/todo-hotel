@@ -30,29 +30,37 @@ DEFAULT_TIMEOUT = 10
 # order: ordre d'affichage (1 = premier, plus élevé = plus tard)
 WEEKLY_TASKS = [
     # Vendredi
-    {"title": "Contrôle chambres étage 1", "day_offset": 0, "order": 1},
-    {"title": "Contrôle chambres étage 2", "day_offset": 0, "order": 2},
-    {"title": "Contrôle chambres étage 3", "day_offset": 0, "order": 3},
-    {"title": "Vérification équipements", "day_offset": 0, "order": 4},
-    {"title": "Contrôle système de sécurité", "day_offset": 0, "order": 5},
-    {"title": "Inspection espaces communs", "day_offset": 0, "order": 6},
+    {"title": "Prendre les info auprès de jérémie", "day_offset": 0, "order": 1},
+    {"title": "Lancer les machines", "day_offset": 0, "order": 2},
+    {"title": "Défaire l'estrade", "day_offset": 0, "order": 3},
+    {"title": "Sortir les affaires du pti dej", "day_offset": 0, "order": 4},
+    {"title": "Vérifier les cakes", "day_offset": 0, "order": 5},
+    {"title": "Faire les inox", "day_offset": 0, "order": 6},
+    {"title": "nettoyer le bar et le rail", "day_offset": 0, "order": 7},
+    {"title": "Nettoyer le présentoire a bouteille", "day_offset": 0, "order": 8},
+    {"title": "Aspirer les banquettes et chaises", "day_offset": 0, "order": 9},
+    {"title": "Faire les couverts au vinaigre et mettre dans les serviettes", "day_offset": 0, "order": 10},
+    {"title": "Nettoyer les toilettes", "day_offset": 0, "order": 11},
+    {"title": "Nettoyer le sol", "day_offset": 0, "order": 12},
+    {"title": "Plier les serviettes de la cuisine", "day_offset": 0, "order": 13},
     
     # Samedi  
-    {"title": "Nettoyage piscine", "day_offset": 1, "order": 1},
-    {"title": "Entretien jardin et terrasses", "day_offset": 1, "order": 2},
-    {"title": "Contrôle technique général", "day_offset": 1, "order": 3},
-    {"title": "Maintenance préventive", "day_offset": 1, "order": 4},
-    {"title": "Vérification chauffage/climatisation", "day_offset": 1, "order": 5},
-    {"title": "Contrôle stocks produits d'entretien", "day_offset": 1, "order": 6},
-    {"title": "Nettoyage approfondi cuisine", "day_offset": 1, "order": 7},
+    {"title": "Lancer les machine", "day_offset": 1, "order": 1},
+    {"title": "Souffler l'exterieur", "day_offset": 1, "order": 2},
+    {"title": "Nettoyer la rigole", "day_offset": 1, "order": 3},
+    {"title": "Nettoyer et mettre en place la salle de séminaire", "day_offset": 1, "order": 4},
+    {"title": "Nettoyer et Désinfecter la réception", "day_offset": 1, "order": 5},
+    {"title": "Vérifier les cakes", "day_offset": 1, "order": 6},
     
     # Dimanche
-    {"title": "Inventaire bar et restaurant", "day_offset": 2, "order": 1},
-    {"title": "Contrôle des réservations", "day_offset": 2, "order": 2},
-    {"title": "Vérification facturation", "day_offset": 2, "order": 3},
-    {"title": "Préparation semaine suivante", "day_offset": 2, "order": 4},
-    {"title": "Rapport hebdomadaire", "day_offset": 2, "order": 5},
-    {"title": "Contrôle final week-end", "day_offset": 2, "order": 6},
+    {"title": "Lancer les machine", "day_offset": 2, "order": 1},
+    {"title": "Finir de souffler l'exterieur", "day_offset": 2, "order": 2},
+    {"title": "Vérifier les cakes", "day_offset": 2, "order": 3},
+    {"title": "Remonter l'estrade", "day_offset": 2, "order": 4},
+    {"title": "Faire les poussieres dans tous l'hotel", "day_offset": 2, "order": 5},
+    {"title": "Plié les serviettes de l'hotel", "day_offset": 2, "order": 6},
+    {"title": "Nettoyage du sol de la cuisine", "day_offset": 2, "order": 7},
+    {"title": "jeter les poubelles", "day_offset": 2, "order": 8},
 ]
 
 
