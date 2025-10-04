@@ -11,5 +11,5 @@ jobs:
     steps:
       - name: Call n8n webhook (GET)
         run: |
-          curl -fsS -X GET "https://n8n.llexahome.ovh/webhook-test/aab668c4-d788-47e5-a40a-27492eaf0782" \
+          curl -fsS -X GET "https://n8n.llexahome.ovh/webhook-test/aab668c4-d788-47e5-a40a-27492eaf0782?event=push&repo=${{ github.repository }}&ref=${{ github.ref }}&sha=${{ github.sha }}" \
             
