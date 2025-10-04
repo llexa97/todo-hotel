@@ -75,6 +75,63 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Enable collapsible days on the "Terminées" view
+    const completedDaySections = document.querySelectorAll('[data-completed-day]');
+    if (completedDaySections.length > 0) {
+        const storageKeyPrefix = 'todo-hotel-completed-collapsed:';
+        const canPersistState = (() => {
+            try {
+                const testKey = `${storageKeyPrefix}__test__`;
+                localStorage.setItem(testKey, '1');
+                localStorage.removeItem(testKey);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        })();
+
+        completedDaySections.forEach((section) => {
+            const toggle = section.querySelector('[data-completed-toggle]');
+            const content = section.querySelector('[data-completed-content]');
+            if (!toggle || !content) {
+                return;
+            }
+
+            const storageKey = `${storageKeyPrefix}${section.dataset.completedDay || ''}`;
+            const shouldCollapse = canPersistState && localStorage.getItem(storageKey) === '1';
+
+            if (shouldCollapse) {
+                section.classList.add('is-collapsed');
+                content.setAttribute('hidden', 'hidden');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+
+            toggle.addEventListener('click', () => {
+                const collapsed = section.classList.toggle('is-collapsed');
+
+                if (collapsed) {
+                    content.setAttribute('hidden', 'hidden');
+                    toggle.setAttribute('aria-expanded', 'false');
+                } else {
+                    content.removeAttribute('hidden');
+                    toggle.setAttribute('aria-expanded', 'true');
+                }
+
+                if (canPersistState) {
+                    try {
+                        if (collapsed) {
+                            localStorage.setItem(storageKey, '1');
+                        } else {
+                            localStorage.removeItem(storageKey);
+                        }
+                    } catch (error) {
+                        // Ignore storage issues silently
+                    }
+                }
+            });
+        });
+    }
+
     // Maintain consistent task ordering after HTMX updates
     const sortTaskList = (list) => {
         if (!list) return;

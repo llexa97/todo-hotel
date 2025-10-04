@@ -189,37 +189,37 @@
             <!-- Completed Tasks View -->
             {% if completed_by_date %}
                 {% for date_key, date_data in completed_by_date %}
-                    <div class="task-card" style="margin-bottom: 1.5rem;">
-                        <div class="task-header">
-                            <div class="task-info">
-                                <div class="task-icon">✅</div>
-                                <div class="task-details">
-                                    <div class="task-day-title">Terminées le {{ date_data.date.strftime('%A %d %B %Y') }}</div>
-                                    <div class="task-day-date">{{ date_data.tasks|length }} tâche(s)</div>
+                    <section class="week-section" data-completed-day="{{ date_key }}">
+                        <button class="week-toggle" type="button" data-completed-toggle aria-expanded="true">
+                            <span class="week-title">Terminées le {{ date_data.date.strftime('%A %d %B %Y') }}</span>
+                            <span class="week-count">{{ date_data.tasks|length }} tâche(s)</span>
+                            <span class="week-toggle-icon" aria-hidden="true">▾</span>
+                        </button>
+                        <div class="week-content" data-completed-content>
+                            <div class="task-card" style="margin-bottom: 0;">
+                                <div class="task-body">
+                                    <div class="task-list">
+                                        {% for task in date_data.tasks %}
+                                            <div class="task-item">
+                                                <div style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
+                                                    ✅
+                                                </div>
+                                                <div class="task-content">
+                                                    <span class="task-title done">{{ task.title }}</span>
+                                                    {% if task.is_recurring %}
+                                                        <span class="task-chip">Récurrente</span>
+                                                    {% endif %}
+                                                    <span style="color: #718096; font-size: 0.75rem; margin-left: 0.5rem;">
+                                                        Échéance: {{ task.due_date.strftime('%d/%m/%Y') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="task-body">
-                            <div class="task-list">
-                                {% for task in date_data.tasks %}
-                                    <div class="task-item">
-                                        <div style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;">
-                                            ✅
-                                        </div>
-                                        <div class="task-content">
-                                            <span class="task-title done">{{ task.title }}</span>
-                                            {% if task.is_recurring %}
-                                                <span class="task-chip">Récurrente</span>
-                                            {% endif %}
-                                            <span style="color: #718096; font-size: 0.75rem; margin-left: 0.5rem;">
-                                                Échéance: {{ task.due_date.strftime('%d/%m/%Y') }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
+                    </section>
                 {% endfor %}
             {% else %}
                 <div class="task-card">
