@@ -1,6 +1,9 @@
 // Main JavaScript for Hotel Le Trèfle Task Management
 
+console.log('🚀 main.js loaded');
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOMContentLoaded fired');
     // Set default date to today for the form
     const dateInput = document.getElementById('due_date');
     if (dateInput && !dateInput.value) {
