@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 5000);
 
     // Enable collapsible weeks on the "Toutes les tâches" view
-    const weekSections = document.querySelectorAll('.week-section');
+    const weekSections = document.querySelectorAll('[data-week-key]');
     if (weekSections.length > 0) {
         const storageKeyPrefix = 'todo-hotel-week-collapsed:';
         const canPersistState = (() => {
