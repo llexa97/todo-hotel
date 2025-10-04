@@ -77,6 +77,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Enable collapsible days on the "Terminées" view
     const completedDaySections = document.querySelectorAll('[data-completed-day]');
+    console.log('🔍 Completed day sections found:', completedDaySections.length);
+
     if (completedDaySections.length > 0) {
         const storageKeyPrefix = 'todo-hotel-completed-collapsed:';
         const canPersistState = (() => {
@@ -84,30 +86,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 const testKey = `${storageKeyPrefix}__test__`;
                 localStorage.setItem(testKey, '1');
                 localStorage.removeItem(testKey);
+                console.log('✅ LocalStorage is available');
                 return true;
             } catch (error) {
+                console.log('❌ LocalStorage NOT available:', error);
                 return false;
             }
         })();
 
-        completedDaySections.forEach((section) => {
+        completedDaySections.forEach((section, index) => {
+            console.log(`📅 Processing completed section ${index + 1}:`, section.dataset.completedDay);
+
             const toggle = section.querySelector('[data-completed-toggle]');
             const content = section.querySelector('[data-completed-content]');
+
+            console.log('  Toggle found:', !!toggle);
+            console.log('  Content found:', !!content);
+
             if (!toggle || !content) {
+                console.log('  ⚠️ Skipping section - toggle or content missing');
                 return;
             }
 
             const storageKey = `${storageKeyPrefix}${section.dataset.completedDay || ''}`;
             const shouldCollapse = canPersistState && localStorage.getItem(storageKey) === '1';
+            console.log('  Storage key:', storageKey);
+            console.log('  Should collapse on load:', shouldCollapse);
 
             if (shouldCollapse) {
                 section.classList.add('is-collapsed');
                 content.setAttribute('hidden', 'hidden');
                 toggle.setAttribute('aria-expanded', 'false');
+                console.log('  ✓ Section collapsed on load');
             }
 
             toggle.addEventListener('click', () => {
+                console.log('🖱️ Toggle clicked for:', section.dataset.completedDay);
                 const collapsed = section.classList.toggle('is-collapsed');
+                console.log('  New state - collapsed:', collapsed);
 
                 if (collapsed) {
                     content.setAttribute('hidden', 'hidden');
@@ -121,15 +137,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     try {
                         if (collapsed) {
                             localStorage.setItem(storageKey, '1');
+                            console.log('  💾 Saved collapsed state to localStorage');
                         } else {
                             localStorage.removeItem(storageKey);
+                            console.log('  💾 Removed collapsed state from localStorage');
                         }
                     } catch (error) {
-                        // Ignore storage issues silently
+                        console.log('  ❌ Error saving to localStorage:', error);
                     }
                 }
             });
+
+            console.log('  ✓ Event listener attached');
         });
+    } else {
+        console.log('ℹ️ No completed day sections found on this page');
     }
 
     // Maintain consistent task ordering after HTMX updates
