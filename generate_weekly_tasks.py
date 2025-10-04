@@ -48,9 +48,10 @@ WEEKLY_TASKS = [
     {"title": "Lancer les machine", "day_offset": 1, "order": 1},
     {"title": "Souffler l'exterieur", "day_offset": 1, "order": 2},
     {"title": "Nettoyer la rigole", "day_offset": 1, "order": 3},
-    {"title": "Nettoyer et mettre en place la salle de séminaire", "day_offset": 1, "order": 4},
-    {"title": "Nettoyer et Désinfecter la réception", "day_offset": 1, "order": 5},
-    {"title": "Vérifier les cakes", "day_offset": 1, "order": 6},
+    {"title": "Arroser les plantes", "day_offset": 1, "order": 4},
+    {"title": "Nettoyer et mettre en place la salle de séminaire", "day_offset": 1, "order": 5},
+    {"title": "Nettoyer et Désinfecter la réception", "day_offset": 1, "order": 6},
+    {"title": "Vérifier les cakes", "day_offset": 1, "order": 7},
     
     # Dimanche
     {"title": "Lancer les machine", "day_offset": 2, "order": 1},
