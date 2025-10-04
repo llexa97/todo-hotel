@@ -9,8 +9,7 @@ jobs:
   trigger:
     runs-on: ubuntu-latest
     steps:
-      - name: Call n8n webhook (POST)
+      - name: Call n8n webhook (GET)
         run: |
-          curl -fsS -X POST "https://n8n.llexahome.ovh/webhook-test/68c8ade7-c734-46e7-b655-78650f772b07/webhook" \
-            -H "Content-Type: application/json" \
-            -d "{\"event\":\"push\",\"repo\":\"${{ github.repository }}\",\"ref\":\"${{ github.ref }}\",\"sha\":\"${{ github.sha }}\"}"
+          curl -fsS -X POST "https://n8n.llexahome.ovh/webhook-test/aab668c4-d788-47e5-a40a-27492eaf0782" \
+            
